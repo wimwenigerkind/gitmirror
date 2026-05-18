@@ -40,14 +40,15 @@ TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 
 ARCHIVE="gitmirror_Linux_${ARCH}.tar.gz"
+CHECKSUMS="gitmirror_${VERSION#v}_checksums.txt"
 BASE="https://github.com/${REPO}/releases/download/${VERSION}"
 
 log "Downloading archive + checksums"
 curl -fsSL --proto '=https' --tlsv1.2 "${BASE}/${ARCHIVE}"    -o "${TMP}/${ARCHIVE}"
-curl -fsSL --proto '=https' --tlsv1.2 "${BASE}/checksums.txt" -o "${TMP}/checksums.txt"
+curl -fsSL --proto '=https' --tlsv1.2 "${BASE}/${CHECKSUMS}"  -o "${TMP}/${CHECKSUMS}"
 
 log "Verifying SHA256"
-(cd "$TMP" && sha256sum --ignore-missing -c checksums.txt >/dev/null) \
+(cd "$TMP" && sha256sum --ignore-missing -c "${CHECKSUMS}" >/dev/null) \
   || die "checksum verification failed"
 
 log "Extracting"
