@@ -39,7 +39,12 @@ func main() {
 					log.Printf("%s/%s: auth url: %v", name, r.Slug, err)
 					return nil
 				}
-				destDir := filepath.Join(cfg.Destination, name, r.Slug+".git")
+				parts := []string{cfg.Destination, name}
+				if r.Project != "" {
+					parts = append(parts, r.Project)
+				}
+				parts = append(parts, r.Slug+".git")
+				destDir := filepath.Join(parts...)
 				if err := mirror.Sync(ctx, authURL, destDir); err != nil {
 					log.Printf("%s/%s: sync: %v", name, r.Slug, err)
 				}

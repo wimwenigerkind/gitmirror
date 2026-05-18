@@ -23,7 +23,10 @@ type bitbucketListResponse struct {
 }
 
 type bitbucketRepo struct {
-	Slug  string `json:"slug"`
+	Slug    string `json:"slug"`
+	Project struct {
+		Key string `json:"key"`
+	} `json:"project"`
 	Links struct {
 		Clone []struct {
 			Name string `json:"name"`
@@ -43,8 +46,9 @@ func (p *BitbucketProvider) ListRepositories(ctx context.Context) ([]Repository,
 		}
 		for _, r := range page.Values {
 			repos = append(repos, Repository{
-				Slug: r.Slug,
-				URL:  httpsCloneURL(r),
+				Slug:    r.Slug,
+				URL:     httpsCloneURL(r),
+				Project: r.Project.Key,
 			})
 		}
 		url = page.Next
