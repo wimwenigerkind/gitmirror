@@ -1,0 +1,6 @@
+destination: ./mirrors
+provider:
+  provider-name:
+    type: bitbucket
+    owner: workspace # https://support.atlassian.com/bitbucket-cloud/docs/what-is-a-workspace/
+    token: token # https://support.atlassian.com/bitbucket-cloud/docs/access-tokens/
