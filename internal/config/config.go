@@ -14,7 +14,8 @@ type ProviderConfig struct {
 }
 
 type Config struct {
-	Provider map[string]ProviderConfig `yaml:"provider"`
+	Destination string                    `yaml:"destination"`
+	Provider    map[string]ProviderConfig `yaml:"provider"`
 }
 
 func Load(path string) (*Config, error) {
@@ -25,6 +26,9 @@ func Load(path string) (*Config, error) {
 	var cfg Config
 	if err := yaml.Unmarshal(data, &cfg); err != nil {
 		return nil, fmt.Errorf("parse config: %w", err)
+	}
+	if cfg.Destination == "" {
+		cfg.Destination = "./mirrors"
 	}
 	return &cfg, nil
 }

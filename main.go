@@ -2,10 +2,11 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
+	"path/filepath"
 
 	"github.com/wimwenigerkind/gitmirror/internal/config"
+	"github.com/wimwenigerkind/gitmirror/internal/mirror"
 	"github.com/wimwenigerkind/gitmirror/internal/provider"
 )
 
@@ -19,15 +20,25 @@ func main() {
 	for name, pc := range cfg.Provider {
 		p, err := provider.New(name, pc)
 		if err != nil {
-			log.Fatal(err)
-		}
-		repos, err := p.ListRepositories(ctx)
-		if err != nil {
 			log.Printf("%s: %v", name, err)
 			continue
 		}
+		repos, err := p.ListRepositories(ctx)
+		if err != nil {
+			log.Printf("%s: list: %v", name, err)
+			continue
+		}
 		for _, r := range repos {
-			fmt.Println(name, r.Slug)
+			authURL, err := p.AuthenticatedURL(r)
+			if err != nil {
+				log.Printf("%s/%s: auth url: %v", name, r.Slug, err)
+				continue
+			}
+			destDir := filepath.Join(cfg.Destination, name, r.Slug+".git")
+			if err := mirror.Sync(ctx, authURL, destDir); err != nil {
+				log.Printf("%s/%s: sync: %v", name, r.Slug, err)
+				continue
+			}
 		}
 	}
 }
