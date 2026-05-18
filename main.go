@@ -8,6 +8,7 @@ import (
 	"github.com/wimwenigerkind/gitmirror/internal/config"
 	"github.com/wimwenigerkind/gitmirror/internal/mirror"
 	"github.com/wimwenigerkind/gitmirror/internal/provider"
+	"golang.org/x/sync/errgroup"
 )
 
 func main() {
@@ -28,17 +29,23 @@ func main() {
 			log.Printf("%s: list: %v", name, err)
 			continue
 		}
+		var g errgroup.Group
+		g.SetLimit(cfg.Concurrency)
 		for _, r := range repos {
-			authURL, err := p.AuthenticatedURL(r)
-			if err != nil {
-				log.Printf("%s/%s: auth url: %v", name, r.Slug, err)
-				continue
-			}
-			destDir := filepath.Join(cfg.Destination, name, r.Slug+".git")
-			if err := mirror.Sync(ctx, authURL, destDir); err != nil {
-				log.Printf("%s/%s: sync: %v", name, r.Slug, err)
-				continue
-			}
+			r := r
+			g.Go(func() error {
+				authURL, err := p.AuthenticatedURL(r)
+				if err != nil {
+					log.Printf("%s/%s: auth url: %v", name, r.Slug, err)
+					return nil
+				}
+				destDir := filepath.Join(cfg.Destination, name, r.Slug+".git")
+				if err := mirror.Sync(ctx, authURL, destDir); err != nil {
+					log.Printf("%s/%s: sync: %v", name, r.Slug, err)
+				}
+				return nil
+			})
 		}
+		_ = g.Wait()
 	}
 }

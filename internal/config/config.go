@@ -15,6 +15,7 @@ type ProviderConfig struct {
 
 type Config struct {
 	Destination string                    `yaml:"destination"`
+	Concurrency int                       `yaml:"concurrency"`
 	Provider    map[string]ProviderConfig `yaml:"provider"`
 }
 
@@ -29,6 +30,9 @@ func Load(path string) (*Config, error) {
 	}
 	if cfg.Destination == "" {
 		cfg.Destination = "./mirrors"
+	}
+	if cfg.Concurrency <= 0 {
+		cfg.Concurrency = 4
 	}
 	return &cfg, nil
 }
