@@ -1,0 +1,27 @@
+[Unit]
+Description=Mirror git repositories from configured providers
+Documentation=https://github.com/wimwenigerkind/gitmirror
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=gitmirror
+Group=gitmirror
+WorkingDirectory=/var/lib/gitmirror
+Environment=HOME=/var/lib/gitmirror
+ExecStart=/usr/local/bin/gitmirror
+
+# Hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/gitmirror
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictNamespaces=true
+LockPersonality=true
