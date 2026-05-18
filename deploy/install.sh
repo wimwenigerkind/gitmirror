@@ -27,7 +27,8 @@ esac
 
 VERSION="${VERSION:-}"
 if [[ -z "$VERSION" ]]; then
-  VERSION=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases/latest" \
+  LATEST_JSON=$(curl -fsSL "https://api.github.com/repos/${REPO}/releases/latest")
+  VERSION=$(printf '%s' "$LATEST_JSON" \
     | grep -m1 '"tag_name":' \
     | sed -E 's/.*"tag_name":[[:space:]]*"([^"]+)".*/\1/')
 fi
